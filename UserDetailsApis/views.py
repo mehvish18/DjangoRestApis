@@ -1,5 +1,4 @@
 from django.db import DatabaseError
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
@@ -55,12 +54,15 @@ def signup(request):
     try:
         if(users_serializer.is_valid()):
             users_serializer.save()
-            return JsonResponse("Signed up Successfully", status=201, safe=False)
+            return JsonResponse({"message":"Signed up Successfully"}, status=201)
     except DatabaseError as e:
         errObj['error']['code'] = "400"
         errObj['error']['message'] = "User already exists"+str(e)
         return JsonResponse(errObj, status=400, safe=False)
-    return JsonResponse("Failed to add", status=400, safe=False)
+    errors = users_serializer.errors
+    errObj['error']['code'] = "400"
+    errObj['error']['message'] = "Failed to add as: "+str(errors)
+    return JsonResponse(errObj, status=400, safe=False)
 
 
 #Add User Details API would accept age, date of birth, profession, address, and hobby for a particular user
@@ -81,14 +83,14 @@ def addUser(request):
     if(user_details_serializer.is_valid()):
         try:
             user_details_serializer.save()
-            return JsonResponse("Added User Details Successfully", safe=False)
+            return JsonResponse({"message":"Added User Details Successfully"}, safe=False)
         except DatabaseError as e:
             errObj['error']['code'] = "400"
             errObj['error']['message'] = "Unable to add details as details for the user already exists"
             return JsonResponse(errObj, status=400, safe=False)
     errors = user_details_serializer.errors
     errObj['error']['code'] = "400"
-    errObj['error']['message'] = "Failed to add user details: "+ errors 
+    errObj['error']['message'] = "Failed to add user details as: "+ str(errors) 
     return JsonResponse(errObj, status=400, safe=False)
 
 
@@ -116,13 +118,15 @@ def updateUser(request):
     if(user_details_serializer.is_valid()):
         try:
             user_details_serializer.save()
-            return JsonResponse("Updated Successfully", safe=False)
+            return JsonResponse({"message":"Updated User Details Successfully"}, safe=False)
         except DatabaseError as e:
             errObj['error']['code'] = "400"
             errObj['error']['message'] = "Failed to update "+str(e)
             return JsonResponse(errObj, status=400, safe=False)
     errors = user_details_serializer.errors
-    return JsonResponse("Failed to update "+errors, status=400, safe=False)
+    errObj['error']['code'] = "400"
+    errObj['error']['message'] = "Failed to update as: "+str(errors)
+    return JsonResponse(errObj, status=400, safe=False)
 
 
 #Delete User API should delete the user with the help of the primary key
@@ -153,4 +157,4 @@ def deleteUser(request):
             errObj['error']['message'] = "Unable to delete as user does not exist"
             return JsonResponse("Unable to delete as user does not exist", status=400, safe=False)    
         user.delete()
-        return JsonResponse("Deleted Successfully", safe=False)
+        return JsonResponse({"message":"Deleted Successfully"}, safe=False)

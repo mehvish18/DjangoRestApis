@@ -22,7 +22,7 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/login', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     re_path(r'^',include('UserDetailsApis.urls')),
 ]
